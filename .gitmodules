@@ -1,0 +1,4 @@
+[submodule "third_party/circular_buffer"]
+	path = third_party/circular_buffer
+	url = https://github.com/xitren/circular_buffer.git
+	tag = v1.0.0
