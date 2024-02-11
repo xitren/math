@@ -8,8 +8,6 @@
 
 namespace xitren::math {
 
-// Original idea: https://nda.ya.ru/t/KyxRYfTT6L25T9
-
 template <typename T>
 concept rational_type = std::same_as<T, double> || std::same_as<T, float>;
 

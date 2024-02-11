@@ -2,6 +2,6 @@ PROJECT_NAME            = math
 INPUT                   = include/xitren/math/bezier.hpp include/xitren/math/fir.hpp include/xitren/math/fir_fast.hpp
                           include/xitren/math/kht_opt.hpp include/xitren/math/pid.hpp include/xitren/math/pid2.hpp
                           include/xitren/math/spid.hpp
-OUTPUT_DIRECTORY        = doxygen
+OUTPUT_DIRECTORY        = docs
 OPTIMIZE_OUTPUT_FOR_C   = YES
 GENERATE_LATEX          = NO

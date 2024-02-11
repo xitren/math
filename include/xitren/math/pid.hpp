@@ -9,7 +9,6 @@ namespace xitren::math {
 using pid_params2 = xitren::math::pid_params<double>;
 
 /*
- * Related article: https://nda.ya.ru/t/wHPMbLAn6L25zE
  * PID:
  *      u(t) = Kp*e(t) + Ki*|e(t)dt + Kd(de(t)/dt)
  *Laplace transform PID:
