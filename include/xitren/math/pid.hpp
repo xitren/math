@@ -51,7 +51,30 @@ using pid_params2 = xitren::math::pid_params<double>;
 
 class pid {
 public:
+    /**
+     * @brief Constructs a new PID object with the given parameters.
+     *
+     * @param sampling_time the sampling time of the system.
+     * @param filter the filter constant for the derivative filter.
+     * @param kp the proportional gain constant.
+     * @param ki the integral gain constant.
+     * @param kd the derivative gain constant.
+     * @param max the maximum output value.
+     * @param min the minimum output value.
+     */
     constexpr explicit pid(pid_params2 const& p) : pid(p.sampling_time, p.filter, p.kp, p.ki, p.kd, p.max, p.min) {}
+
+    /**
+     * @brief Constructs a new PID object with the given parameters.
+     *
+     * @param sampling_time the sampling time of the system.
+     * @param filter the filter constant for the derivative filter.
+     * @param kp the proportional gain constant.
+     * @param ki the integral gain constant.
+     * @param kd the derivative gain constant.
+     * @param max the maximum output value.
+     * @param min the minimum output value.
+     */
     constexpr explicit pid(double sampling_time = 1., double filter = 20., double kp = 20., double ki = 1.,
                            double kd = 1., double max = 10000., double min = -10000.)
         : max_(max),
@@ -68,6 +91,12 @@ public:
           ke2_{ke2(kp, ki, kd, filter, sampling_time)}
     {}
 
+    /**
+     * @brief Calculates the output of the PID controller.
+     *
+     * @param y the current input value.
+     * @return the output of the PID controller.
+     */
     double
     value(double y)
     {
@@ -82,7 +111,9 @@ public:
         return u0_;
     }
 
-    // experiment
+    /**
+     * @brief Resets the internal state of the PID controller.
+     */
     void
     reset()
     {
@@ -94,11 +125,23 @@ public:
         u0_ = 0;
     }
 
+    /**
+     * @brief Gets the current target value of the PID controller.
+     *
+     * @return the current target value of the PID controller.
+     */
     [[nodiscard]] double
     target() const
     {
         return target_;
     }
+
+    /**
+     * @brief Sets the target value of the PID controller.
+     *
+     * @param val the new target value of the PID controller.
+     * @return a reference to this PID object.
+     */
     pid&
     target(double val)
     {
@@ -106,11 +149,23 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Gets the maximum output value of the PID controller.
+     *
+     * @return the maximum output value of the PID controller.
+     */
     [[nodiscard]] double
     max() const
     {
         return max_;
     }
+
+    /**
+     * @brief Sets the maximum output value of the PID controller.
+     *
+     * @param val the new maximum output value of the PID controller.
+     * @return a reference to this PID object.
+     */
     pid&
     max(double val)
     {
@@ -118,11 +173,23 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Gets the minimum output value of the PID controller.
+     *
+     * @return the minimum output value of the PID controller.
+     */
     [[nodiscard]] double
     min() const
     {
         return min_;
     }
+
+    /**
+     * @brief Sets the minimum output value of the PID controller.
+     *
+     * @param val the new minimum output value of the PID controller.
+     * @return a reference to this PID object.
+     */
     pid&
     min(double val)
     {
@@ -130,11 +197,23 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Gets the proportional gain constant of the PID controller.
+     *
+     * @return the proportional gain constant of the PID controller.
+     */
     [[nodiscard]] double
     proportional() const
     {
         return proportional_;
     }
+
+    /**
+     * @brief Sets the proportional gain constant of the PID controller.
+     *
+     * @param val the new proportional gain constant of the PID controller.
+     * @return a reference to this PID object.
+     */
     pid&
     proportional(double val)
     {
@@ -156,11 +235,19 @@ public:
         return *this;
     }
 
+    /**
+     * Returns the current derivative value.
+     */
     [[nodiscard]] double
     derivative() const
     {
         return derivative_;
     }
+
+    /**
+     * Sets the derivative value.
+     * @param val The new derivative value.
+     */
     pid&
     derivative(double val)
     {
@@ -169,11 +256,19 @@ public:
         return *this;
     }
 
+    /**
+     * Returns the current filter value.
+     */
     [[nodiscard]] double
     filter() const
     {
         return filter_;
     }
+
+    /**
+     * Sets the filter value.
+     * @param val The new filter value.
+     */
     pid&
     filter(double val)
     {
@@ -182,11 +277,19 @@ public:
         return *this;
     }
 
+    /**
+     * Returns the current sampling time value.
+     */
     [[nodiscard]] double
     sampling_time() const
     {
         return sampling_time_;
     }
+
+    /**
+     * Sets the sampling time value.
+     * @param val The new sampling time value.
+     */
     pid&
     sampling_time(double val)
     {
@@ -207,6 +310,9 @@ private:
     double ku1_, ku2_, ke0_, ke1_, ke2_;
     double e2_{}, e1_{}, e0_{}, u2_{}, u1_{}, u0_{};
 
+    /**
+     * Recalculates the PID coefficients.
+     */
     void
     recalculate()
     {
@@ -217,66 +323,146 @@ private:
         ke2_ = ke2(proportional_, integral_, derivative_, filter_, sampling_time_);
     }
 
+    /**
+     * Calculates the a0 coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The a0 coefficient.
+     */
     static constexpr double
     a0(double filter, double sampling_time)
     {
         return 1 + filter * sampling_time;
     }
 
+    /**
+     * Calculates the a1 coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The a1 coefficient.
+     */
     static constexpr double
     a1(double filter, double sampling_time)
     {
         return -(2 + filter * sampling_time);
     }
 
+    /**
+     * Calculates the a2 coefficient.
+     * @return The a2 coefficient.
+     */
     static constexpr double
     a2()
     {
         return 1;
     }
 
+    /**
+     * Calculates the b0 coefficient.
+     * @param kp The proportional coefficient.
+     * @param ki The integral coefficient.
+     * @param kd The derivative coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The b0 coefficient.
+     */
     static constexpr double
     b0(double kp, double ki, double kd, double filter, double sampling_time)
     {
         return kp * (1 + filter * sampling_time) + ki * sampling_time * (1 + filter * sampling_time) + kd * filter;
     }
 
+    /**
+     * Calculates the b1 coefficient.
+     * @param kp The proportional coefficient.
+     * @param ki The integral coefficient.
+     * @param kd The derivative coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The b1 coefficient.
+     */
     static constexpr double
     b1(double kp, double ki, double kd, double filter, double sampling_time)
     {
         return -(kp * (2 + filter * sampling_time) + ki * sampling_time + 2 * kd * filter);
     }
 
+    /**
+     * Calculates the b2 coefficient.
+     * @param kp The proportional coefficient.
+     * @param kd The derivative coefficient.
+     * @param filter The filter value.
+     * @return The b2 coefficient.
+     */
     static constexpr double
     b2(double kp, double kd, double filter)
     {
         return kp + kd * filter;
     }
 
+    /**
+     * Calculates the ku1 coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The ku1 coefficient.
+     */
     static constexpr double
     ku1(double filter, double sampling_time)
     {
         return a1(filter, sampling_time) / a0(filter, sampling_time);
     }
 
+    /**
+     * Calculates the ku2 coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The ku2 coefficient.
+     */
     static constexpr double
     ku2(double filter, double sampling_time)
     {
         return a2() / a0(filter, sampling_time);
     }
 
+    /**
+     * Calculates the ke0 coefficient.
+     * @param kp The proportional coefficient.
+     * @param ki The integral coefficient.
+     * @param kd The derivative coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The ke0 coefficient.
+     */
     static constexpr double
     ke0(double kp, double ki, double kd, double filter, double sampling_time)
     {
         return b0(kp, ki, kd, filter, sampling_time) / a0(filter, sampling_time);
     }
 
+    /**
+     * Calculates the ke1 coefficient.
+     * @param kp The proportional coefficient.
+     * @param ki The integral coefficient.
+     * @param kd The derivative coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The ke1 coefficient.
+     */
     static constexpr double
     ke1(double kp, double ki, double kd, double filter, double sampling_time)
     {
         return b1(kp, ki, kd, filter, sampling_time) / a0(filter, sampling_time);
     }
 
+    /**
+     * Calculates the ke2 coefficient.
+     * @param kp The proportional coefficient.
+     * @param ki The integral coefficient.
+     * @param kd The derivative coefficient.
+     * @param filter The filter value.
+     * @param sampling_time The sampling time value.
+     * @return The ke2 coefficient.
+     */
     static constexpr double
     ke2(double kp, [[maybe_unused]] double ki, double kd, double filter, double sampling_time)
     {
@@ -284,4 +470,4 @@ private:
     }
 };
 
-}    // namespace loveka::components::math::pid
+}    // namespace xitren::math

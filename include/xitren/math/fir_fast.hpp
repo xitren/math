@@ -11,30 +11,37 @@ namespace xitren::math {
 
 template <std::size_t Order>
 class filter : public containers::circular_buffer<std::uint32_t, Order> {
-    constexpr static std::uint32_t power_  = 20;
-    constexpr static double        factor_ = static_cast<double>(1 << power_);
+    static constexpr std::uint32_t power_  = 20;
+    static constexpr double        factor_ = static_cast<double>(1 << power_);
 
     using containers::circular_buffer<std::uint32_t, Order>::begin;
     using containers::circular_buffer<std::uint32_t, Order>::end;
     using containers::circular_buffer<std::uint32_t, Order>::full;
 
 public:
-    explicit filter(const std::array<double, Order>& table_data) : table_{}
-    {
-        populate(table_data);
-    }
+    /**
+     * Constructs a filter with the given table data
+     * @param table_data the table data to use for the filter
+     */
+    explicit filter(std::array<double, Order> const& table_data) : table_{} { populate(table_data); }
 
-    filter(const std::array<double, Order>&        table_data,
-           const std::array<std::uint32_t, Order>& data)
-        : table_{}
+    /**
+     * Constructs a filter with the given table data and data
+     * @param table_data the table data to use for the filter
+     * @param data the data to filter
+     */
+    filter(std::array<double, Order> const& table_data, std::array<std::uint32_t, Order> const& data) : table_{}
     {
         populate(table_data);
         (*this) << data;
     }
 
-    filter(const std::array<double, Order>&         table_data,
-           const std::array<std::uint32_t, Order>&& data)
-        : table_{}
+    /**
+     * Constructs a filter with the given table data and rvalue data
+     * @param table_data the table data to use for the filter
+     * @param data the rvalue data to filter
+     */
+    filter(std::array<double, Order> const& table_data, std::array<std::uint32_t, Order> const&& data) : table_{}
     {
         populate(table_data);
         (*this) << data;
@@ -42,13 +49,13 @@ public:
 
     template <std::size_t Size>
     filter<Size>&
-    operator*(const filter<Size>& other)
+    operator*(filter<Size> const& other)
     {
         static_assert(Order == Size, "Filter lengths do not match!");
         auto other_ptr = other.table_.begin();
         for (auto& item : table_) {
-            const double a = (static_cast<double>(item)) / factor_;
-            const double b = (static_cast<double>(*other_ptr)) / factor_;
+            double const a = (static_cast<double>(item)) / factor_;
+            double const b = (static_cast<double>(*other_ptr)) / factor_;
             item           = static_cast<std::uint32_t>((a * b) * factor_);
             other_ptr++;
         }
@@ -57,7 +64,7 @@ public:
 
     template <std::size_t Size>
     filter<Size>&
-    operator+(const filter<Size>& other)
+    operator+(filter<Size> const& other)
     {
         static_assert(Order == Size, "Filter lengths do not match!");
         auto other_ptr = other.table_.begin();
@@ -70,7 +77,7 @@ public:
 
     template <std::size_t Size>
     filter<Size>&
-    operator-(const filter<Size>& other)
+    operator-(filter<Size> const& other)
     {
         static_assert(Order == Size, "Filter lengths do not match!");
         auto other_ptr = other.table_.begin();
@@ -81,6 +88,11 @@ public:
         return *this;
     }
 
+    /**
+     * Applies the filter to a new data point
+     * @param val the new data point
+     * @return the filtered data point
+     */
     std::uint32_t
     value(std::uint32_t val)
     {
@@ -97,12 +109,19 @@ public:
         return static_cast<std::uint32_t>(ret_val);
     }
 
+    /**
+     * Resets the filter state
+     */
     void
     reset()
     {
         containers::circular_buffer<std::uint32_t, Order>::clear();
     }
 
+    /**
+     * Returns the filter table data
+     * @return the filter table data
+     */
     std::array<std::uint32_t, Order>
     table() const
     {
@@ -113,7 +132,7 @@ private:
     std::array<std::uint32_t, Order> table_;
 
     void
-    populate(const std::array<double, Order>& table_data)
+    populate(std::array<double, Order> const& table_data)
     {
         auto other_ptr = table_data.begin();
         for (auto& item : table_) {
@@ -126,32 +145,61 @@ private:
 template <std::size_t Order, std::size_t Cutoff, std::size_t Sampling>
 class lowpass : public filter<Order + 1> {
 public:
-    constexpr static std::array<double, Order + 1>
+    /**
+     * Creates a lowpass filter with the given cutoff frequency and sampling rate
+     * @param cutoff the cutoff frequency of the filter, in samples per second
+     * @param sampling_rate the sampling rate of the filter, in samples per second
+     */
+    static constexpr std::array<double, Order + 1>
     prepare_table()
     {
-        constexpr double      cutoff = static_cast<double>(Cutoff) / static_cast<double>(Sampling);
-        constexpr double      factor = 2.0 * cutoff;
-        constexpr std::size_t half   = Order >> 1;
+        // calculate the cutoff frequency in terms of the filter's sampling rate
+        constexpr double cutoff = static_cast<double>(Cutoff) / static_cast<double>(Sampling);
+        // calculate the filter's factor, which determines the amount of attenuation
+        constexpr double              factor = 2.0 * cutoff;
+        constexpr std::size_t         half   = Order >> 1;
         std::array<double, Order + 1> array{};
-        std::size_t                   i = 0;
+        // loop through each element in the filter's table
+        std::size_t i = 0;
         for (double& item : array) {
+            // calculate the current element of the filter's table using the sinc function
             item = factor * filter<Order + 1>::sinc(factor * ((double)(i++) - (double)half));
         }
         return array;
     }
 
-    lowpass() : filter<Order + 1>{prepare_table()} {}
-
-    template <std::size_t N>
-    explicit lowpass(const std::array<std::uint32_t, N>& data)
-        : filter<Order + 1>{prepare_table(), data}
+    /**
+     * Constructs a lowpass filter with the given cutoff frequency and sampling rate
+     */
+    lowpass() : filter<Order + 1> { prepare_table() }
     {}
 
+    /**
+     * Constructs a lowpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
+     * @param data the data to filter
+     */
     template <std::size_t N>
-    explicit lowpass(const std::array<std::uint32_t, N>&& data)
-        : filter<Order + 1>{prepare_table(), data}
+    explicit lowpass(std::array<std::uint32_t, N> const& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
     {}
 
+    /**
+     * Constructs a lowpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit lowpass(std::array<std::uint32_t, N> const&& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
+    {}
+
+    /**
+     * Returns the order of the lowpass filter
+     * @return the order of the lowpass filter
+     */
     [[nodiscard]] std::size_t
     order() const
     {
@@ -162,33 +210,61 @@ public:
 template <std::size_t Order, std::size_t Cutoff, std::size_t Sampling>
 class highpass : public filter<Order + 1> {
 public:
-    constexpr static std::array<double, Order + 1>
+    /**
+     * Creates a highpass filter with the given cutoff frequency and sampling rate
+     * @param cutoff the cutoff frequency of the filter, in samples per second
+     * @param sampling_rate the sampling rate of the filter, in samples per second
+     */
+    static constexpr std::array<double, Order + 1>
     prepare_table()
     {
-        constexpr double      cutoff = static_cast<double>(Cutoff) / static_cast<double>(Sampling);
-        constexpr double      factor = 2.0 * cutoff;
-        constexpr std::size_t half   = Order >> 1;
+        // calculate the cutoff frequency in terms of the filter's sampling rate
+        constexpr double cutoff = static_cast<double>(Cutoff) / static_cast<double>(Sampling);
+        // calculate the filter's factor, which determines the amount of attenuation
+        constexpr double              factor = 2.0 * cutoff;
+        constexpr std::size_t         half   = Order >> 1;
         std::array<double, Order + 1> array{};
-        std::size_t                   i = 0;
+        // loop through each element in the filter's table
+        std::size_t i = 0;
         for (double& item : array) {
-            item = (i == half ? 1.0 : 0.0)
-                   - factor * filter<Order + 1>::sinc(factor * ((double)(i++) - (double)half));
+            // calculate the current element of the filter's table using the sinc function
+            item = (i == half ? 1.0 : 0.0) - factor * filter<Order + 1>::sinc(factor * ((double)(i++) - (double)half));
         }
         return array;
     }
 
-    highpass() : filter<Order + 1>{prepare_table()} {}
-
-    template <std::size_t N>
-    explicit highpass(const std::array<std::uint32_t, N>& data)
-        : filter<Order + 1>{prepare_table(), data}
+    /**
+     * Constructs a highpass filter with the given cutoff frequency and sampling rate
+     */
+    highpass() : filter<Order + 1> { prepare_table() }
     {}
 
+    /**
+     * Constructs a highpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
+     * @param data the data to filter
+     */
     template <std::size_t N>
-    explicit highpass(const std::array<std::uint32_t, N>&& data)
-        : filter<Order + 1>{prepare_table(), data}
+    explicit highpass(std::array<std::uint32_t, N> const& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
     {}
 
+    /**
+     * Constructs a highpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit highpass(std::array<std::uint32_t, N> const&& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
+    {}
+
+    /**
+     * Returns the order of the highpass filter
+     * @return the order of the highpass filter
+     */
     [[nodiscard]] std::size_t
     order() const
     {
@@ -196,15 +272,20 @@ public:
     }
 };
 
-template <std::size_t Order, std::size_t LowerCutoff, std::size_t HigherCutoff,
-          std::size_t Sampling>
+template <std::size_t Order, std::size_t LowerCutoff, std::size_t HigherCutoff, std::size_t Sampling>
 class bandstop : public filter<Order + 1> {
 public:
-    constexpr static std::array<double, Order + 1>
+    /**
+     * Creates a table of coefficients for a bandstop FIR filter with the given cutoff frequencies and sampling rate.
+     * @param cutoff the cutoff frequency of the lowpass section, in samples per second
+     * @param sampling_rate the sampling rate of the filter, in samples per second
+     * @return the filter table data
+     */
+    static constexpr std::array<double, Order + 1>
     prepare_table()
     {
-        constexpr auto low  = lowpass<Order, LowerCutoff, Sampling>::prepare_table();
-        constexpr auto high = highpass<Order, HigherCutoff, Sampling>::prepare_table();
+        constexpr auto                low  = lowpass<Order, LowerCutoff, Sampling>::prepare_table();
+        constexpr auto                high = highpass<Order, HigherCutoff, Sampling>::prepare_table();
         std::array<double, Order + 1> array{};
         auto                          low_ptr = low.begin();
         for (double& item : array) {
@@ -219,18 +300,40 @@ public:
         return array;
     }
 
-    bandstop() : filter<Order + 1>{prepare_table()} {}
-
-    template <std::size_t N>
-    explicit bandstop(const std::array<std::uint32_t, N>& data)
-        : filter<Order + 1>{prepare_table(), data}
+    /**
+     * Constructs a bandstop FIR filter with the given cutoff frequencies and sampling rate.
+     */
+    bandstop() : filter<Order + 1> { prepare_table() }
     {}
 
+    /**
+     * Constructs a bandstop FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
+     * data.
+     * @param data the data to filter
+     */
     template <std::size_t N>
-    explicit bandstop(const std::array<std::uint32_t, N>&& data)
-        : filter<Order + 1>{prepare_table(), data}
+    explicit bandstop(std::array<std::uint32_t, N> const& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
     {}
 
+    /**
+     * Constructs a bandstop FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
+     * data.
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit bandstop(std::array<std::uint32_t, N> const&& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
+    {}
+
+    /**
+     * Returns the order of the bandstop filter.
+     * @return the order of the bandstop filter
+     */
     [[nodiscard]] std::size_t
     order() const
     {
@@ -238,14 +341,19 @@ public:
     }
 };
 
-template <std::size_t Order, std::size_t LowerCutoff, std::size_t HigherCutoff,
-          std::size_t Sampling>
+template <std::size_t Order, std::size_t LowerCutoff, std::size_t HigherCutoff, std::size_t Sampling>
 class bandpass : public filter<Order + 1> {
 public:
-    constexpr static std::array<double, Order + 1>
+    /**
+     * Creates a table of coefficients for a bandpass FIR filter with the given cutoff frequencies and sampling rate.
+     * @param cutoff the cutoff frequency of the lowpass section, in samples per second
+     * @param sampling_rate the sampling rate of the filter, in samples per second
+     * @return the filter table data
+     */
+    static constexpr std::array<double, Order + 1>
     prepare_table()
     {
-        constexpr auto fir = bandstop<Order, LowerCutoff, HigherCutoff, Sampling>::prepare_table();
+        constexpr auto                fir  = bandstop<Order, LowerCutoff, HigherCutoff, Sampling>::prepare_table();
         constexpr std::size_t         half = Order >> 1;
         std::array<double, Order + 1> array{};
         std::copy(fir.begin(), fir.end(), array.begin());
@@ -256,18 +364,40 @@ public:
         return array;
     }
 
-    bandpass() : filter<Order + 1>{prepare_table()} {}
-
-    template <std::size_t N>
-    explicit bandpass(const std::array<std::uint32_t, N>& data)
-        : filter<Order + 1>{prepare_table(), data}
+    /**
+     * Constructs a bandpass FIR filter with the given cutoff frequencies and sampling rate.
+     */
+    bandpass() : filter<Order + 1> { prepare_table() }
     {}
 
+    /**
+     * Constructs a bandpass FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
+     * data.
+     * @param data the data to filter
+     */
     template <std::size_t N>
-    explicit bandpass(const std::array<std::uint32_t, N>&& data)
-        : filter<Order + 1>{prepare_table(), data}
+    explicit bandpass(std::array<std::uint32_t, N> const& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
     {}
 
+    /**
+     * Constructs a bandpass FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
+     * data.
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit bandpass(std::array<std::uint32_t, N> const&& data) : filter<Order + 1>
+    {
+        prepare_table(), data
+    }
+    {}
+
+    /**
+     * Returns the order of the bandpass filter.
+     * @return the order of the bandpass filter
+     */
     [[nodiscard]] std::size_t
     order() const
     {
@@ -277,7 +407,11 @@ public:
 
 template <std::size_t Order>
 class moving_average : public filter<Order> {
-    constexpr static std::array<double, Order>
+    /**
+     * Prepares the filter table data
+     * @return the filter table data
+     */
+    static constexpr std::array<double, Order>
     prepare_table()
     {
         std::array<double, Order> array{};
@@ -288,22 +422,42 @@ class moving_average : public filter<Order> {
     }
 
 public:
-    moving_average() : filter<Order>{prepare_table()} {}
-
-    template <std::size_t N>
-    explicit moving_average(const std::array<std::uint32_t, N>& data)
-        : filter<Order>{prepare_table(), data}
+    /**
+     * Constructs a moving average filter with the given order
+     */
+    moving_average() : filter<Order> { prepare_table() }
     {}
 
+    /**
+     * Constructs a moving average filter with the given order and applies it to the given data
+     * @param data the data to filter
+     */
     template <std::size_t N>
-    explicit moving_average(const std::array<std::uint32_t, N>&& data)
-        : filter<Order>{prepare_table(), data}
+    explicit moving_average(std::array<std::uint32_t, N> const& data) : filter<Order>
+    {
+        prepare_table(), data
+    }
     {}
 
+    /**
+     * Constructs a moving average filter with the given order and applies it to the given data
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit moving_average(std::array<std::uint32_t, N> const&& data) : filter<Order>
+    {
+        prepare_table(), data
+    }
+    {}
+
+    /**
+     * Returns the order of the moving average filter
+     * @return the order of the moving average filter
+     */
     static std::size_t
     size()
     {
         return Order;
     }
 };
-}    // namespace loveka::components::math::fir::fast
+}    // namespace xitren::math
