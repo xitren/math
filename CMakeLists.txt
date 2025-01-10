@@ -22,7 +22,13 @@ target_include_directories(
 
 message(STATUS "Adding library project \"${LIBRARY_NAME}\"")
 
-add_subdirectory(third_party/circular_buffer)
+include(FetchContent)
+FetchContent_Declare(
+		circular_buffer
+		GIT_REPOSITORY https://github.com/xitren/circular_buffer.git
+		GIT_TAG        v1.0.1
+)
+FetchContent_MakeAvailable(circular_buffer)
 target_link_libraries(${LIBRARY_NAME} INTERFACE ${GLOBAL_NAMESPACE}::circular_buffer)
 
 enable_testing()

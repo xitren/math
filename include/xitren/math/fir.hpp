@@ -10,10 +10,10 @@
 namespace xitren::math {
 
 template <std::size_t Order>
-class filter : public containers::circular_buffer<double, Order> {
-    using containers::circular_buffer<double, Order>::begin;
-    using containers::circular_buffer<double, Order>::end;
-    using containers::circular_buffer<double, Order>::full;
+class filter : public circular_buffer<double, Order> {
+    using circular_buffer<double, Order>::begin;
+    using circular_buffer<double, Order>::end;
+    using circular_buffer<double, Order>::full;
 
 protected:
     /**
@@ -287,7 +287,7 @@ public:
     double
     value(double val)
     {
-        containers::circular_buffer<double, Order>::push(val);
+        circular_buffer<double, Order>::push(val);
         if (!full())
             return 0.;
         auto   it      = begin();
@@ -305,7 +305,7 @@ public:
     void
     reset()
     {
-        containers::circular_buffer<double, Order>::clear();
+        circular_buffer<double, Order>::clear();
     }
 
     /**
@@ -351,7 +351,14 @@ public:
     /**
      * Constructs a lowpass filter with the given cutoff frequency and sampling rate
      */
-    constexpr lowpass() : filter<Order + 1> { prepare_table() }
+    constexpr lowpass() : filter<Order + 1>{prepare_table()} {}
+
+    /**
+     * Constructs a lowpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    constexpr explicit lowpass(std::array<double, N> const& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -359,21 +366,7 @@ public:
      * @param data the data to filter
      */
     template <std::size_t N>
-    constexpr explicit lowpass(std::array<double, N> const& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
-    {}
-
-    /**
-     * Constructs a lowpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
-     * @param data the data to filter
-     */
-    template <std::size_t N>
-    constexpr explicit lowpass(std::array<double, N> const&& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
+    constexpr explicit lowpass(std::array<double, N> const&& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -417,7 +410,14 @@ public:
     /**
      * Constructs a highpass filter with the given cutoff frequency and sampling rate
      */
-    highpass() : filter<Order + 1> { prepare_table() }
+    highpass() : filter<Order + 1>{prepare_table()} {}
+
+    /**
+     * Constructs a highpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit highpass(std::array<double, N> const& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -425,21 +425,7 @@ public:
      * @param data the data to filter
      */
     template <std::size_t N>
-    explicit highpass(std::array<double, N> const& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
-    {}
-
-    /**
-     * Constructs a highpass filter with the given cutoff frequency and sampling rate, and applies it to the given data
-     * @param data the data to filter
-     */
-    template <std::size_t N>
-    explicit highpass(std::array<double, N> const&& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
+    explicit highpass(std::array<double, N> const&& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -484,7 +470,15 @@ public:
     /**
      * Constructs a bandstop FIR filter with the given cutoff frequencies and sampling rate.
      */
-    bandstop() : filter<Order + 1> { prepare_table() }
+    bandstop() : filter<Order + 1>{prepare_table()} {}
+
+    /**
+     * Constructs a bandstop FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
+     * data.
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit bandstop(std::array<double, N> const& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -493,22 +487,7 @@ public:
      * @param data the data to filter
      */
     template <std::size_t N>
-    explicit bandstop(std::array<double, N> const& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
-    {}
-
-    /**
-     * Constructs a bandstop FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
-     * data.
-     * @param data the data to filter
-     */
-    template <std::size_t N>
-    explicit bandstop(std::array<double, N> const&& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
+    explicit bandstop(std::array<double, N> const&& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -548,7 +527,15 @@ public:
     /**
      * Constructs a bandpass FIR filter with the given cutoff frequencies and sampling rate.
      */
-    bandpass() : filter<Order + 1> { prepare_table() }
+    bandpass() : filter<Order + 1>{prepare_table()} {}
+
+    /**
+     * Constructs a bandpass FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
+     * data.
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit bandpass(std::array<double, N> const& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -557,22 +544,7 @@ public:
      * @param data the data to filter
      */
     template <std::size_t N>
-    explicit bandpass(std::array<double, N> const& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
-    {}
-
-    /**
-     * Constructs a bandpass FIR filter with the given cutoff frequencies and sampling rate, and applies it to the given
-     * data.
-     * @param data the data to filter
-     */
-    template <std::size_t N>
-    explicit bandpass(std::array<double, N> const&& data) : filter<Order + 1>
-    {
-        prepare_table(), data
-    }
+    explicit bandpass(std::array<double, N> const&& data) : filter<Order + 1>{prepare_table(), data}
     {}
 
     /**
@@ -606,7 +578,14 @@ public:
     /**
      * Constructs a moving average filter with the given order
      */
-    moving_average() : filter<Order> { prepare_table() }
+    moving_average() : filter<Order>{prepare_table()} {}
+
+    /**
+     * Constructs a moving average filter with the given order and applies it to the given data
+     * @param data the data to filter
+     */
+    template <std::size_t N>
+    explicit moving_average(std::array<double, N> const& data) : filter<Order>{prepare_table(), data}
     {}
 
     /**
@@ -614,21 +593,7 @@ public:
      * @param data the data to filter
      */
     template <std::size_t N>
-    explicit moving_average(std::array<double, N> const& data) : filter<Order>
-    {
-        prepare_table(), data
-    }
-    {}
-
-    /**
-     * Constructs a moving average filter with the given order and applies it to the given data
-     * @param data the data to filter
-     */
-    template <std::size_t N>
-    explicit moving_average(std::array<double, N> const&& data) : filter<Order>
-    {
-        prepare_table(), data
-    }
+    explicit moving_average(std::array<double, N> const&& data) : filter<Order>{prepare_table(), data}
     {}
 
     /**
