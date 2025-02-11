@@ -10,7 +10,7 @@ set(GLOBAL_NAMESPACE
 
 project(${LIBRARY_NAME}
 	DESCRIPTION "Math library"
-    VERSION 1.0.0
+    VERSION 1.0.1
 	LANGUAGES CXX
 )
 
