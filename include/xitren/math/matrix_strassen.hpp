@@ -3,23 +3,25 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <iostream>
 #include <vector>
 
 namespace xitren::math {
 
 template <class Type, std::size_t Size>
-class matrix {
+class matrix_strassen {
     static_assert((Size & (Size - 1)) == 0, "Should be power of 2!");
 
 public:
-    using quarter_type      = matrix<Type, Size / 2>;
+    using quarter_type      = matrix_strassen<Type, Size / 2>;
     using data_type         = std::array<Type, Size * Size>;
-    using quarter_data_type = std::array<Type, Size>;
+    using quarter_data_type = std::array<Type, Size * Size / 4>;
 
-    matrix() = default;
-    matrix(data_type const& data)
+    matrix_strassen() = default;
+    matrix_strassen(data_type const& data)
         : a_{get_init(data, 0)}, b_{get_init(data, 1)}, c_{get_init(data, 2)}, d_{get_init(data, 3)}
     {}
 
@@ -41,8 +43,8 @@ public:
         }
     }
 
-    matrix
-    operator*(matrix const& other) const
+    matrix_strassen
+    operator*(matrix_strassen const& other) const
     {
         auto const H1 = (a_ + d_) * (other.a_ + other.d_);
         auto const H2 = (c_ + d_) * other.a_;
@@ -51,19 +53,30 @@ public:
         auto const H5 = (a_ + b_) * other.d_;
         auto const H6 = (c_ - a_) * (other.a_ + other.b_);
         auto const H7 = (b_ - d_) * (other.c_ + other.d_);
-        return matrix{H1 + H4 - H5 + H7, H3 + H5, H2 + H4, H1 + H3 - H2 + H6};
+        return matrix_strassen{H1 + H4 - H5 + H7, H3 + H5, H2 + H4, H1 + H3 - H2 + H6};
     }
 
-    matrix
-    operator+(matrix const& other) const
+    matrix_strassen
+    operator+(matrix_strassen const& other) const
     {
-        return matrix{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
+        return matrix_strassen{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
     }
 
-    matrix
-    operator-(matrix const& other) const
+    matrix_strassen
+    operator-(matrix_strassen const& other) const
     {
-        return matrix{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
+        return matrix_strassen{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
+    }
+
+    static matrix_strassen
+    get_rand_matrix()
+    {
+        std::srand(std::time({}));    // use current time as seed for random generator
+        data_type data_rand;
+        for (auto it{data_rand.begin()}; it != data_rand.end(); it++) {
+            (*it) = static_cast<Type>(std::rand());
+        }
+        return matrix_strassen{data_rand};
     }
 
 private:
@@ -72,7 +85,7 @@ private:
     const quarter_type c_{};
     const quarter_type d_{};
 
-    matrix(quarter_type const& m_a, quarter_type const& m_b, quarter_type const& m_c, quarter_type const& m_d)
+    matrix_strassen(quarter_type const& m_a, quarter_type const& m_b, quarter_type const& m_c, quarter_type const& m_d)
         : a_{m_a}, b_{m_b}, c_{m_c}, d_{m_d}
     {}
 
@@ -107,13 +120,13 @@ private:
 };
 
 template <class Type>
-class matrix<Type, 2> : public std::array<Type, 4> {
+class matrix_strassen<Type, 2> : public std::array<Type, 4> {
 
 public:
     using data_type = std::array<Type, 4>;
 
-    matrix() = default;
-    matrix(const data_type data) : data_type{data} {}
+    matrix_strassen() = default;
+    matrix_strassen(const data_type data) : data_type{data} {}
 
     auto
     get(std::size_t row, std::size_t column) const
@@ -121,8 +134,8 @@ public:
         return data_type::operator[](row * 2 + column);
     }
 
-    matrix
-    operator*(matrix const& other) const
+    matrix_strassen
+    operator*(matrix_strassen const& other) const
     {
         Type const& a = data_type::operator[](0);
         Type const& b = data_type::operator[](1);
@@ -138,24 +151,24 @@ public:
         const Type v = (c + d) * (C - A);
         const Type w = t + (c + d - a) * (A + D - C);
 
-        return matrix{typename matrix::data_type{
+        return matrix_strassen{typename matrix_strassen::data_type{
             {t + b * B, w + v + (a + b - c - d) * D, w + u + d * (B + C - A - D), w + u + v}}};
     }
 
-    matrix
-    operator+(matrix const& other) const
+    matrix_strassen
+    operator+(matrix_strassen const& other) const
     {
-        return matrix{
-            typename matrix::data_type{{data_type::operator[](0) + other[0], data_type::operator[](1) + other[1],
-                                        data_type::operator[](2) + other[2], data_type::operator[](3) + other[3]}}};
+        return matrix_strassen{typename matrix_strassen::data_type{
+            {data_type::operator[](0) + other[0], data_type::operator[](1) + other[1],
+             data_type::operator[](2) + other[2], data_type::operator[](3) + other[3]}}};
     }
 
-    matrix
-    operator-(matrix const& other) const
+    matrix_strassen
+    operator-(matrix_strassen const& other) const
     {
-        return matrix{
-            typename matrix::data_type{{data_type::operator[](0) - other[0], data_type::operator[](1) - other[1],
-                                        data_type::operator[](2) - other[2], data_type::operator[](3) - other[3]}}};
+        return matrix_strassen{typename matrix_strassen::data_type{
+            {data_type::operator[](0) - other[0], data_type::operator[](1) - other[1],
+             data_type::operator[](2) - other[2], data_type::operator[](3) - other[3]}}};
     }
 
 private:
