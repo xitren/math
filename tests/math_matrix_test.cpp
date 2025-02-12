@@ -48,10 +48,7 @@ TEST(matrix_test, matrix_strassen_2x2)
     matrix_strassen<int, 2> mA{A};
     matrix_strassen<int, 2> mB{B};
 
-    print_matrix_strassen(mA);
-    print_matrix_strassen(mB);
     auto mC = mA * mB;
-    print_matrix_strassen(mC);
 
     EXPECT_EQ(C[0], mC.get(0, 0));
     EXPECT_EQ(C[1], mC.get(0, 1));
@@ -68,10 +65,7 @@ TEST(matrix_test, matrix_strassen_4x4)
     matrix_strassen<int, 4> mA{A};
     matrix_strassen<int, 4> mB{B};
 
-    print_matrix_strassen(mA);
-    print_matrix_strassen(mB);
     auto mC = mA * mB;
-    print_matrix_strassen(mC);
 
     for (std::size_t l{}; l < 4; l++) {
         for (std::size_t m{}; m < 4; m++) {
@@ -80,9 +74,81 @@ TEST(matrix_test, matrix_strassen_4x4)
     }
 }
 
-constexpr int times = 1000;
+constexpr std::size_t times_small = 1000000;
+constexpr std::size_t times       = 10000;
+constexpr std::size_t times_big   = 100;
 
-TEST(matrix_test, matrix_strassen_64x64_time)
+TEST(matrix_test, matrix_strassen_2x2_mult_time)
+{
+    using loc_type = matrix_strassen<int, 4>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_4x4_mult_time)
+{
+    using loc_type = matrix_strassen<int, 4>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_8x8_mult_time)
+{
+    using loc_type = matrix_strassen<int, 8>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_16x16_mult_time)
+{
+    using loc_type = matrix_strassen<int, 16>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_32x32_mult_time)
+{
+    using loc_type = matrix_strassen<int, 32>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_64x64_mult_time)
 {
     using loc_type = matrix_strassen<int, 64>;
 
@@ -90,27 +156,97 @@ TEST(matrix_test, matrix_strassen_64x64_time)
     auto mB = loc_type::get_rand_matrix();
 
     auto mCptr = std::make_shared<loc_type>(mA * mB);
-    for (int i{}; i < times; i++) {
+    for (std::size_t i{}; i < times_big; i++) {
         mCptr = std::make_shared<loc_type>(mA * mB);
     }
-    std::cout << mCptr->get(0, 0);
+    std::cout << mCptr->get(0, 0) << std::endl;
 }
 
-TEST(matrix_test, matrix_strassen_256x256_time)
+TEST(matrix_test, matrix_strassen_128x128_mult_time)
 {
-    using loc_type = matrix_strassen<double, 256>;
+    using loc_type = matrix_strassen<double, 128>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
 
     auto mCptr = std::make_shared<loc_type>(mA * mB);
-    for (int i{}; i < times; i++) {
+    for (std::size_t i{}; i < times_big; i++) {
         mCptr = std::make_shared<loc_type>(mA * mB);
     }
-    std::cout << mCptr->get(0, 0);
+    std::cout << mCptr->get(0, 0) << std::endl;
 }
 
-TEST(matrix_test, matrix_naive_64x64_time)
+TEST(matrix_test, matrix_naive_2x2_mult_time)
+{
+    using loc_type = matrix<int, 2>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_4x4_mult_time)
+{
+    using loc_type = matrix<int, 4>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_8x8_mult_time)
+{
+    using loc_type = matrix<int, 8>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_16x16_mult_time)
+{
+    using loc_type = matrix<int, 16>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_32x32_mult_time)
+{
+    using loc_type = matrix<int, 32>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_64x64_mult_time)
 {
     using loc_type = matrix<int, 64>;
 
@@ -118,22 +254,218 @@ TEST(matrix_test, matrix_naive_64x64_time)
     auto mB = loc_type::get_rand_matrix();
 
     auto mCptr = std::make_shared<loc_type>(mA * mB);
-    for (int i{}; i < times; i++) {
+    for (std::size_t i{}; i < times_big; i++) {
         mCptr = std::make_shared<loc_type>(mA * mB);
     }
     std::cout << (*mCptr)[0][0] << std::endl;
 }
 
-TEST(matrix_test, matrix_naive_256x256_time)
+TEST(matrix_test, matrix_naive_128x128_mult_time)
 {
-    using loc_type = matrix<double, 256>;
+    using loc_type = matrix<double, 128>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
 
     auto mCptr = std::make_shared<loc_type>(mA * mB);
-    for (int i{}; i < times; i++) {
+    for (std::size_t i{}; i < times_big; i++) {
         mCptr = std::make_shared<loc_type>(mA * mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_2x2_add_time)
+{
+    using loc_type = matrix_strassen<int, 2>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_4x4_add_time)
+{
+    using loc_type = matrix_strassen<int, 4>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_8x8_add_time)
+{
+    using loc_type = matrix_strassen<int, 8>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_16x16_add_time)
+{
+    using loc_type = matrix_strassen<int, 16>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_32x32_add_time)
+{
+    using loc_type = matrix_strassen<int, 32>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_64x64_add_time)
+{
+    using loc_type = matrix_strassen<int, 64>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_strassen_128x128_add_time)
+{
+    using loc_type = matrix_strassen<double, 128>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_2x2_add_time)
+{
+    using loc_type = matrix<int, 2>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_4x4_add_time)
+{
+    using loc_type = matrix<int, 4>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_8x8_add_time)
+{
+    using loc_type = matrix<int, 8>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_16x16_add_time)
+{
+    using loc_type = matrix<int, 16>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_32x32_add_time)
+{
+    using loc_type = matrix<int, 32>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_64x64_add_time)
+{
+    using loc_type = matrix<int, 64>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
+    }
+    std::cout << (*mCptr)[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_128x128_add_time)
+{
+    using loc_type = matrix<double, 128>;
+
+    auto mA = loc_type::get_rand_matrix();
+    auto mB = loc_type::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type>(mA * mB);
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = std::make_shared<loc_type>(mA + mB);
     }
     std::cout << (*mCptr)[0][0] << std::endl;
 }

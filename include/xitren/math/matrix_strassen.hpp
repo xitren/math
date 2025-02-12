@@ -86,7 +86,7 @@ private:
     const quarter_type d_{};
 
     matrix_strassen(quarter_type const& m_a, quarter_type const& m_b, quarter_type const& m_c, quarter_type const& m_d)
-        : a_{m_a}, b_{m_b}, c_{m_c}, d_{m_d}
+        : a_{std::move(m_a)}, b_{std::move(m_b)}, c_{std::move(m_c)}, d_{std::move(m_d)}
     {}
 
     static constexpr quarter_data_type
@@ -169,6 +169,17 @@ public:
         return matrix_strassen{typename matrix_strassen::data_type{
             {data_type::operator[](0) - other[0], data_type::operator[](1) - other[1],
              data_type::operator[](2) - other[2], data_type::operator[](3) - other[3]}}};
+    }
+
+    static matrix_strassen
+    get_rand_matrix()
+    {
+        std::srand(std::time({}));    // use current time as seed for random generator
+        data_type data_rand;
+        for (auto it{data_rand.begin()}; it != data_rand.end(); it++) {
+            (*it) = static_cast<Type>(std::rand());
+        }
+        return matrix_strassen{data_rand};
     }
 
 private:
