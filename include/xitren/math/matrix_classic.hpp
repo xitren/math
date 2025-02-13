@@ -12,54 +12,55 @@
 
 namespace xitren::math {
 
-template <class Type, std::size_t Size>
-class matrix : public std::array<std::array<Type, Size>, Size> {
+template <class Type, std::size_t Rows, std::size_t Columns>
+class matrix_classic : public std::array<std::array<Type, Columns>, Rows> {
 
 public:
-    using data_type = std::array<std::array<Type, Size>, Size>;
+    using data_type = std::array<std::array<Type, Columns>, Rows>;
 
-    matrix() = default;
-    matrix(data_type const& data) : data_type{data} {}
+    matrix_classic() = default;
+    matrix_classic(data_type const& data) : data_type{data} {}
 
-    matrix
-    operator*(matrix const& other) const
+    template <std::size_t ColumnsOther>
+    matrix_classic
+    operator*(matrix_classic<Type, Columns, ColumnsOther> const& other) const
     {
         data_type ret;
-        for (std::size_t i = 0; i < Size; i++) {
-            for (std::size_t j = 0; j < Size; j++) {
-                for (std::size_t k = 0; k < Size; k++) {
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < ColumnsOther; j++) {
+                for (std::size_t k = 0; k < Columns; k++) {
                     ret[i][j] += data_type::operator[](i)[k] * other[k][j];
                 }
             }
         }
-        return matrix{ret};
+        return matrix_classic{ret};
     }
 
-    matrix
-    operator+(matrix const& other) const
+    matrix_classic
+    operator+(matrix_classic const& other) const
     {
         data_type ret;
-        for (std::size_t i = 0; i < Size; i++) {
-            for (std::size_t j = 0; j < Size; j++) {
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < Columns; j++) {
                 ret[i][j] = data_type::operator[](i)[j] + other[i][j];
             }
         }
-        return matrix{ret};
+        return matrix_classic{ret};
     }
 
-    matrix
-    operator-(matrix const& other) const
+    matrix_classic
+    operator-(matrix_classic const& other) const
     {
         data_type ret;
-        for (std::size_t i = 0; i < Size; i++) {
-            for (std::size_t j = 0; j < Size; j++) {
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < Columns; j++) {
                 ret[i][j] = data_type::operator[](i)[j] - other[i][j];
             }
         }
-        return matrix{ret};
+        return matrix_classic{ret};
     }
 
-    static matrix
+    static matrix_classic
     get_rand_matrix()
     {
         std::srand(std::time({}));    // use current time as seed for random generator
@@ -69,7 +70,7 @@ public:
                 (*it2) = static_cast<Type>(std::rand());
             }
         }
-        return matrix{data_rand};
+        return matrix_classic{data_rand};
     }
 };
 

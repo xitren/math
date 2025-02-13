@@ -178,7 +178,7 @@ TEST(matrix_test, matrix_strassen_128x128_mult_time)
 
 TEST(matrix_test, matrix_naive_2x2_mult_time)
 {
-    using loc_type = matrix<int, 2>;
+    using loc_type = matrix_classic<int, 2, 2>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -192,7 +192,7 @@ TEST(matrix_test, matrix_naive_2x2_mult_time)
 
 TEST(matrix_test, matrix_naive_4x4_mult_time)
 {
-    using loc_type = matrix<int, 4>;
+    using loc_type = matrix_classic<int, 4, 4>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -206,7 +206,7 @@ TEST(matrix_test, matrix_naive_4x4_mult_time)
 
 TEST(matrix_test, matrix_naive_8x8_mult_time)
 {
-    using loc_type = matrix<int, 8>;
+    using loc_type = matrix_classic<int, 8, 8>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -220,7 +220,7 @@ TEST(matrix_test, matrix_naive_8x8_mult_time)
 
 TEST(matrix_test, matrix_naive_16x16_mult_time)
 {
-    using loc_type = matrix<int, 16>;
+    using loc_type = matrix_classic<int, 16, 16>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -234,7 +234,7 @@ TEST(matrix_test, matrix_naive_16x16_mult_time)
 
 TEST(matrix_test, matrix_naive_32x32_mult_time)
 {
-    using loc_type = matrix<int, 32>;
+    using loc_type = matrix_classic<int, 32, 32>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -248,7 +248,7 @@ TEST(matrix_test, matrix_naive_32x32_mult_time)
 
 TEST(matrix_test, matrix_naive_64x64_mult_time)
 {
-    using loc_type = matrix<int, 64>;
+    using loc_type = matrix_classic<int, 64, 64>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -262,7 +262,7 @@ TEST(matrix_test, matrix_naive_64x64_mult_time)
 
 TEST(matrix_test, matrix_naive_128x128_mult_time)
 {
-    using loc_type = matrix<double, 128>;
+    using loc_type = matrix_classic<double, 128, 128>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -374,7 +374,7 @@ TEST(matrix_test, matrix_strassen_128x128_add_time)
 
 TEST(matrix_test, matrix_naive_2x2_add_time)
 {
-    using loc_type = matrix<int, 2>;
+    using loc_type = matrix_classic<int, 2, 2>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -388,7 +388,7 @@ TEST(matrix_test, matrix_naive_2x2_add_time)
 
 TEST(matrix_test, matrix_naive_4x4_add_time)
 {
-    using loc_type = matrix<int, 4>;
+    using loc_type = matrix_classic<int, 4, 4>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -402,7 +402,7 @@ TEST(matrix_test, matrix_naive_4x4_add_time)
 
 TEST(matrix_test, matrix_naive_8x8_add_time)
 {
-    using loc_type = matrix<int, 8>;
+    using loc_type = matrix_classic<int, 8, 8>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -416,7 +416,7 @@ TEST(matrix_test, matrix_naive_8x8_add_time)
 
 TEST(matrix_test, matrix_naive_16x16_add_time)
 {
-    using loc_type = matrix<int, 16>;
+    using loc_type = matrix_classic<int, 16, 16>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -430,7 +430,7 @@ TEST(matrix_test, matrix_naive_16x16_add_time)
 
 TEST(matrix_test, matrix_naive_32x32_add_time)
 {
-    using loc_type = matrix<int, 32>;
+    using loc_type = matrix_classic<int, 32, 32>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -444,7 +444,7 @@ TEST(matrix_test, matrix_naive_32x32_add_time)
 
 TEST(matrix_test, matrix_naive_64x64_add_time)
 {
-    using loc_type = matrix<int, 64>;
+    using loc_type = matrix_classic<int, 64, 64>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
@@ -458,7 +458,7 @@ TEST(matrix_test, matrix_naive_64x64_add_time)
 
 TEST(matrix_test, matrix_naive_128x128_add_time)
 {
-    using loc_type = matrix<double, 128>;
+    using loc_type = matrix_classic<double, 128, 128>;
 
     auto mA = loc_type::get_rand_matrix();
     auto mB = loc_type::get_rand_matrix();
