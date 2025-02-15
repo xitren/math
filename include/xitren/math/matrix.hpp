@@ -111,16 +111,16 @@ public:
     //  (*this)[Rows][Columns] = | |B B| |B B| C |   ret[Rows][ColumnsOther] = | |B B| C |
     //                           |  R R   R R  R |                             |  R R  R |
     template <std::size_t ColumnsOther>
-    matrix<Type, Rows, ColumnsOther, Batch>
-    operator*(matrix<Type, Columns, ColumnsOther, Batch>& other)
+    void
+    mult(matrix<Type, Columns, ColumnsOther, Batch>& other, matrix<Type, Rows, ColumnsOther, Batch>& ret)
     {
         // ToDo: get back to const
         static_assert(batch_value == other.batch_value);
         using ret_type = matrix<Type, Rows, ColumnsOther, batch_value>;
-        ret_type ret{};
         // Calculate batch zone
         for (std::size_t i = 0; i < ret_type::batch_rows; i++) {
             for (std::size_t j = 0; j < ret_type::batch_columns; j++) {
+                ret.batched_section[i][j].clear();
                 for (std::size_t k = 0; k < batch_columns; k++) {
                     ret.batched_section[i][j]
                         = ret.batched_section[i][j] + batched_section[i][k] * other.batched_section[k][j];
@@ -160,14 +160,12 @@ public:
                 }
             }
         }
-        return ret;
     }
 
-    matrix
-    operator+(matrix const& other) const
+    void
+    add(matrix const& other, matrix& ret) const
     {
         static_assert(batch_value == other.batch_value);
-        matrix ret{};
         for (std::size_t i = 0; i < batch_rows; i++) {
             for (std::size_t j = 0; j < batch_columns; j++) {
                 ret.batched_section[i][j] = batched_section[i][j] + other.batched_section[i][j];
@@ -183,14 +181,12 @@ public:
                 ret.rest_rows_section[i][j] = rest_rows_section[i][j] + other.rest_rows_section[i][j];
             }
         }
-        return ret;
     }
 
-    matrix
-    operator-(matrix const& other) const
+    void
+    sub(matrix const& other, matrix& ret) const
     {
         static_assert(batch_value == other.batch_value);
-        matrix ret{};
         for (std::size_t i = 0; i < batch_rows; i++) {
             for (std::size_t j = 0; j < batch_columns; j++) {
                 ret.batched_section[i][j] = batched_section[i][j] - other.batched_section[i][j];
@@ -206,7 +202,6 @@ public:
                 ret.rest_rows_section[i][j] = rest_rows_section[i][j] - other.rest_rows_section[i][j];
             }
         }
-        return ret;
     }
 
     static matrix

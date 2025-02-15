@@ -60,6 +60,39 @@ public:
         return matrix_classic{ret};
     }
 
+    template <std::size_t ColumnsOther>
+    void
+    mult(matrix_classic<Type, Columns, ColumnsOther> const& other, matrix_classic<Type, Rows, ColumnsOther>& ret)
+    {
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < ColumnsOther; j++) {
+                for (std::size_t k = 0; k < Columns; k++) {
+                    ret[i][j] += data_type::operator[](i)[k] * other[k][j];
+                }
+            }
+        }
+    }
+
+    void
+    add(matrix_classic const& other, matrix_classic& ret)
+    {
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < Columns; j++) {
+                ret[i][j] = data_type::operator[](i)[j] + other[i][j];
+            }
+        }
+    }
+
+    void
+    sub(matrix_classic const& other, matrix_classic& ret)
+    {
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < Columns; j++) {
+                ret[i][j] = data_type::operator[](i)[j] - other[i][j];
+            }
+        }
+    }
+
     static matrix_classic
     get_rand_matrix()
     {

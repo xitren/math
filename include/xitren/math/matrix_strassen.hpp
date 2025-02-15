@@ -62,6 +62,15 @@ public:
         return matrix_strassen{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
     }
 
+    void
+    clear()
+    {
+        a_.clear();
+        b_.clear();
+        c_.clear();
+        d_.clear();
+    }
+
     static matrix_strassen
     get_rand_matrix()
     {
@@ -126,6 +135,14 @@ public:
     get(std::size_t row, std::size_t column)
     {
         return data_type::operator[]((row << 1) + column);
+    }
+
+    void
+    clear()
+    {
+        for (std::size_t i{}; i < data_type::size(); i++) {
+            data_type::operator[](i) = 0;
+        }
     }
 
     matrix_strassen

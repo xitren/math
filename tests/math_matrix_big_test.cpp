@@ -30,13 +30,14 @@ TEST(matrix_big_test, matrix_func_add)
     using loc_type = matrix<double, 3, 4>;
     std::array<int, 12> C{{11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132}};
 
-    loc_type mA{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}};
-    loc_type mB{{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120}};
+    static loc_type mA{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}};
+    static loc_type mB{{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120}};
 
     print_matrix(mA);
     print_matrix(mB);
 
-    auto mC = mA + mB;
+    static loc_type mC{};
+    mA.add(mB, mC);
 
     print_matrix(mC);
     for (std::size_t l{}; l < 3; l++) {
@@ -50,22 +51,26 @@ TEST(matrix_big_test, matrix_func_mult_part)
 {
     using loc_type_a = matrix<double, 2, 2, 2>;
     using loc_type_b = matrix<double, 2, 2, 2>;
+    using loc_type_c = matrix<double, 2, 2, 2>;
 
-    loc_type_a mA1{{1, 2, 6, 7}};
-    loc_type_b mB1{{10, 20, 40, 50}};
-    loc_type_a mA2{{3, 4, 8, 9}};
-    loc_type_b mB2{{70, 80, 100, 110}};
+    static loc_type_a mA1{{1, 2, 6, 7}};
+    static loc_type_b mB1{{10, 20, 40, 50}};
+    static loc_type_a mA2{{3, 4, 8, 9}};
+    static loc_type_b mB2{{70, 80, 100, 110}};
 
     print_matrix(mA1);
     print_matrix(mB1);
 
-    auto mC1 = mA1 * mB1;
+    static loc_type_c mC1{};
+    mA1.mult(mB1, mC1);
     print_matrix(mC1);
 
-    auto mC2 = mA2 * mB2;
+    static loc_type_c mC2{};
+    mA2.mult(mB2, mC2);
     print_matrix(mC2);
 
-    auto mS = mC1 + mC2;
+    static loc_type_c mS{};
+    mC1.mult(mC2, mS);
     print_matrix(mS);
 }
 
@@ -73,15 +78,17 @@ TEST(matrix_big_test, matrix_func_mult)
 {
     using loc_type_a = matrix<double, 3, 5, 2>;
     using loc_type_b = matrix<double, 5, 3, 2>;
+    using loc_type_c = matrix<double, 3, 3, 2>;
     std::array<int, 9> C{{1350, 1500, 1650, 3100, 3500, 3900, 4850, 5500, 6150}};
 
-    loc_type_a mA{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}};
-    loc_type_b mB{{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150}};
+    static loc_type_a mA{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}};
+    static loc_type_b mB{{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150}};
 
     print_matrix(mA);
     print_matrix(mB);
 
-    auto mC = mA * mB;
+    static loc_type_c mC{};
+    mA.mult(mB, mC);
 
     print_matrix(mC);
     for (std::size_t l{}; l < 3; l++) {
@@ -119,29 +126,32 @@ TEST(matrix_test, matrix_hybrid_64x64_mult_time)
     using loc_type2    = matrix<double, 128, 64, 64>;
     using loc_type_ret = matrix<double, 64, 64, 64>;
 
-    static auto mA = loc_type1::get_rand_matrix();
-    static auto mB = loc_type2::get_rand_matrix();
+    static loc_type1 mA = loc_type1::get_rand_matrix();
+    static loc_type2 mB = loc_type2::get_rand_matrix();
 
-    auto mCptr = std::make_shared<loc_type_ret>(mA * mB);
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = std::make_shared<loc_type_ret>(mA * mB);
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr->get(0, 0) << std::endl;
+    std::cout << mC.get(0, 0) << std::endl;
 }
 
 TEST(matrix_test, matrix_naive_64x64_mult_time)
 {
-    using loc_type1 = matrix_classic<double, 64, 128>;
-    using loc_type2 = matrix_classic<double, 128, 64>;
+    using loc_type1    = matrix_classic<double, 64, 128>;
+    using loc_type2    = matrix_classic<double, 128, 64>;
+    using loc_type_ret = matrix_classic<double, 64, 64>;
 
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA * mB;
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = mA * mB;
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr[0][0] << std::endl;
+    std::cout << mC[0][0] << std::endl;
 }
 
 TEST(matrix_test, matrix_hybrid_77x77_mult_time)
@@ -153,26 +163,29 @@ TEST(matrix_test, matrix_hybrid_77x77_mult_time)
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA * mB;
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = mA * mB;
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr.get(0, 0) << std::endl;
+    std::cout << mC.get(0, 0) << std::endl;
 }
 
 TEST(matrix_test, matrix_naive_77x77_mult_time)
 {
-    using loc_type1 = matrix_classic<double, 77, 30>;
-    using loc_type2 = matrix_classic<double, 30, 77>;
+    using loc_type1    = matrix_classic<double, 77, 30>;
+    using loc_type2    = matrix_classic<double, 30, 77>;
+    using loc_type_ret = matrix_classic<double, 77, 77>;
 
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA * mB;
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = mA * mB;
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr[0][0] << std::endl;
+    std::cout << mC[0][0] << std::endl;
 }
 
 TEST(matrix_test, matrix_hybrid_64x64_mult_unit8_time)
@@ -184,26 +197,29 @@ TEST(matrix_test, matrix_hybrid_64x64_mult_unit8_time)
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    auto mCptr = std::make_shared<loc_type_ret>(mA * mB);
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = std::make_shared<loc_type_ret>(mA * mB);
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr->get(0, 0) << std::endl;
+    std::cout << mC.get(0, 0) << std::endl;
 }
 
 TEST(matrix_test, matrix_naive_64x64_mult_unit8_time)
 {
-    using loc_type1 = matrix_classic<std::uint8_t, 64, 128>;
-    using loc_type2 = matrix_classic<std::uint8_t, 128, 64>;
+    using loc_type1    = matrix_classic<std::uint8_t, 64, 128>;
+    using loc_type2    = matrix_classic<std::uint8_t, 128, 64>;
+    using loc_type_ret = matrix_classic<uint8_t, 64, 64>;
 
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA * mB;
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = mA * mB;
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr[0][0] << std::endl;
+    std::cout << mC[0][0] << std::endl;
 }
 
 TEST(matrix_test, matrix_hybrid_77x77_mult_unit8_time)
@@ -215,26 +231,29 @@ TEST(matrix_test, matrix_hybrid_77x77_mult_unit8_time)
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA * mB;
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = mA * mB;
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr.get(0, 0) << std::endl;
+    std::cout << mC.get(0, 0) << std::endl;
 }
 
 TEST(matrix_test, matrix_naive_77x77_mult_unit8_time)
 {
-    using loc_type1 = matrix_classic<std::uint8_t, 77, 30>;
-    using loc_type2 = matrix_classic<std::uint8_t, 30, 77>;
+    using loc_type1    = matrix_classic<std::uint8_t, 77, 30>;
+    using loc_type2    = matrix_classic<std::uint8_t, 30, 77>;
+    using loc_type_ret = matrix_classic<uint8_t, 77, 77>;
 
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA * mB;
+    static loc_type_ret mC{};
+    mA.mult(mB, mC);
     for (std::size_t i{}; i < times_big; i++) {
-        mCptr = mA * mB;
+        mA.mult(mB, mC);
     }
-    std::cout << mCptr[0][0] << std::endl;
+    std::cout << mC[0][0] << std::endl;
 }
 
 TEST(matrix_test, matrix_hybrid_64x128_add_time)
@@ -246,26 +265,29 @@ TEST(matrix_test, matrix_hybrid_64x128_add_time)
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    auto mCptr = std::make_shared<loc_type_ret>(mA + mB);
+    static loc_type_ret mC{};
+    mA.add(mB, mC);
     for (std::size_t i{}; i < times_small; i++) {
-        mCptr = std::make_shared<loc_type_ret>(mA + mB);
+        mA.add(mB, mC);
     }
-    std::cout << mCptr->get(0, 0) << std::endl;
+    std::cout << mC.get(0, 0) << std::endl;
 }
 
 TEST(matrix_test, matrix_naive_64x128_add_time)
 {
-    using loc_type1 = matrix_classic<double, 64, 128>;
-    using loc_type2 = matrix_classic<double, 64, 128>;
+    using loc_type1    = matrix_classic<double, 64, 128>;
+    using loc_type2    = matrix_classic<double, 64, 128>;
+    using loc_type_ret = matrix_classic<double, 64, 128>;
 
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA + mB;
+    static loc_type_ret mC{};
+    mA.add(mB, mC);
     for (std::size_t i{}; i < times_small; i++) {
-        mCptr = mA + mB;
+        mA.add(mB, mC);
     }
-    std::cout << mCptr[0][0] << std::endl;
+    std::cout << mC[0][0] << std::endl;
 }
 
 TEST(matrix_test, matrix_hybrid_77x77_add_time)
@@ -277,24 +299,27 @@ TEST(matrix_test, matrix_hybrid_77x77_add_time)
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA + mB;
+    static loc_type_ret mC{};
+    mA.add(mB, mC);
     for (std::size_t i{}; i < times_small; i++) {
-        mCptr = mA + mB;
+        mA.add(mB, mC);
     }
-    std::cout << mCptr.get(0, 0) << std::endl;
+    std::cout << mC.get(0, 0) << std::endl;
 }
 
 TEST(matrix_test, matrix_naive_77x77_add_time)
 {
-    using loc_type1 = matrix_classic<double, 77, 77>;
-    using loc_type2 = matrix_classic<double, 77, 77>;
+    using loc_type1    = matrix_classic<double, 77, 77>;
+    using loc_type2    = matrix_classic<double, 77, 77>;
+    using loc_type_ret = matrix_classic<double, 77, 77>;
 
     static auto mA = loc_type1::get_rand_matrix();
     static auto mB = loc_type2::get_rand_matrix();
 
-    static auto mCptr = mA + mB;
+    static loc_type_ret mC{};
+    mA.add(mB, mC);
     for (std::size_t i{}; i < times_small; i++) {
-        mCptr = mA + mB;
+        mA.add(mB, mC);
     }
-    std::cout << mCptr[0][0] << std::endl;
+    std::cout << mC[0][0] << std::endl;
 }
