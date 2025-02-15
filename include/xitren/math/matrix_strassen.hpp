@@ -8,7 +8,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <iostream>
 #include <vector>
 
 namespace xitren::math {

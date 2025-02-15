@@ -47,33 +47,6 @@ TEST(matrix_big_test, matrix_func_add)
     }
 }
 
-TEST(matrix_big_test, matrix_func_mult_part)
-{
-    using loc_type_a = matrix<double, 2, 2, 2>;
-    using loc_type_b = matrix<double, 2, 2, 2>;
-    using loc_type_c = matrix<double, 2, 2, 2>;
-
-    static loc_type_a mA1{{1, 2, 6, 7}};
-    static loc_type_b mB1{{10, 20, 40, 50}};
-    static loc_type_a mA2{{3, 4, 8, 9}};
-    static loc_type_b mB2{{70, 80, 100, 110}};
-
-    print_matrix(mA1);
-    print_matrix(mB1);
-
-    static loc_type_c mC1{};
-    mA1.mult(mB1, mC1);
-    print_matrix(mC1);
-
-    static loc_type_c mC2{};
-    mA2.mult(mB2, mC2);
-    print_matrix(mC2);
-
-    static loc_type_c mS{};
-    mC1.mult(mC2, mS);
-    print_matrix(mS);
-}
-
 TEST(matrix_big_test, matrix_func_mult)
 {
     using loc_type_a = matrix<double, 3, 5, 2>;
