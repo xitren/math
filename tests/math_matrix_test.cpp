@@ -56,6 +56,23 @@ TEST(matrix_test, matrix_strassen_2x2)
     EXPECT_EQ(C[3], mC.get(1, 1));
 }
 
+TEST(matrix_test, matrix_strassen_2x2_v2)
+{
+    std::array<int, 4> A{{1, 2, 6, 7}};
+    std::array<int, 4> B{{10, 20, 40, 50}};
+    std::array<int, 4> C{{90, 120, 340, 470}};
+
+    matrix_strassen<int, 2> mA{A};
+    matrix_strassen<int, 2> mB{B};
+
+    auto mC = mA * mB;
+
+    EXPECT_EQ(C[0], mC.get(0, 0));
+    EXPECT_EQ(C[1], mC.get(0, 1));
+    EXPECT_EQ(C[2], mC.get(1, 0));
+    EXPECT_EQ(C[3], mC.get(1, 1));
+}
+
 TEST(matrix_test, matrix_strassen_4x4)
 {
     std::array<int, 16> A{{1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7}};

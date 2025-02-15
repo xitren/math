@@ -1,5 +1,7 @@
 #pragma once
 
+#include <xitren/math/branchless.hpp>
+
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -25,20 +27,24 @@ public:
         : a_{get_init(data, 0)}, b_{get_init(data, 1)}, c_{get_init(data, 2)}, d_{get_init(data, 3)}
     {}
 
-    auto
-    get(std::size_t row, std::size_t column) const
+    auto&
+    get(std::size_t row, std::size_t column)
     {
-        if (row < (Size / 2)) {
-            if (column < (Size / 2)) {
-                return a_.get(row % (Size / 2), column % (Size / 2));
+        auto const half_size = Size >> 1;
+        // ToDo: rewrite with branchless
+        // const std::array<quarter_type const*, 4> quart{{&a_, &b_, &c_, &d_}};
+        // auto& sel = branchless_select(row < half_size && column < half_size, a_, c_);
+        if (row < half_size) {
+            if (column < half_size) {
+                return a_.get(row % half_size, column % half_size);
             } else {
-                return b_.get(row % (Size / 2), column % (Size / 2));
+                return b_.get(row % half_size, column % half_size);
             }
         } else {
-            if (column < (Size / 2)) {
-                return c_.get(row % (Size / 2), column % (Size / 2));
+            if (column < half_size) {
+                return c_.get(row % half_size, column % half_size);
             } else {
-                return d_.get(row % (Size / 2), column % (Size / 2));
+                return d_.get(row % half_size, column % half_size);
             }
         }
     }
@@ -80,10 +86,10 @@ public:
     }
 
 private:
-    const quarter_type a_{};
-    const quarter_type b_{};
-    const quarter_type c_{};
-    const quarter_type d_{};
+    quarter_type a_{};
+    quarter_type b_{};
+    quarter_type c_{};
+    quarter_type d_{};
 
     matrix_strassen(quarter_type const& m_a, quarter_type const& m_b, quarter_type const& m_c, quarter_type const& m_d)
         : a_{std::move(m_a)}, b_{std::move(m_b)}, c_{std::move(m_c)}, d_{std::move(m_d)}
@@ -128,10 +134,10 @@ public:
     matrix_strassen() = default;
     matrix_strassen(const data_type data) : data_type{data} {}
 
-    auto
-    get(std::size_t row, std::size_t column) const
+    auto&
+    get(std::size_t row, std::size_t column)
     {
-        return data_type::operator[](row * 2 + column);
+        return data_type::operator[]((row << 1) + column);
     }
 
     matrix_strassen
