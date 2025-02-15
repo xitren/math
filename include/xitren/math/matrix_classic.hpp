@@ -22,10 +22,10 @@ public:
     matrix_classic(data_type const& data) : data_type{data} {}
 
     template <std::size_t ColumnsOther>
-    matrix_classic
+    matrix_classic<Type, Rows, ColumnsOther>
     operator*(matrix_classic<Type, Columns, ColumnsOther> const& other) const
     {
-        data_type ret;
+        typename matrix_classic<Type, Rows, ColumnsOther>::data_type ret;
         for (std::size_t i = 0; i < Rows; i++) {
             for (std::size_t j = 0; j < ColumnsOther; j++) {
                 for (std::size_t k = 0; k < Columns; k++) {
@@ -33,7 +33,7 @@ public:
                 }
             }
         }
-        return matrix_classic{ret};
+        return matrix_classic<Type, Rows, ColumnsOther>{ret};
     }
 
     matrix_classic

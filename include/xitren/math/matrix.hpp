@@ -111,8 +111,8 @@ public:
     //  (*this)[Rows][Columns] = | |B B| |B B| C |   ret[Rows][ColumnsOther] = | |B B| C |
     //                           |  R R   R R  R |                             |  R R  R |
     template <std::size_t ColumnsOther>
-    matrix<Type, Rows, ColumnsOther, batch_value>
-    operator*(matrix<Type, Columns, ColumnsOther>& other)
+    matrix<Type, Rows, ColumnsOther, Batch>
+    operator*(matrix<Type, Columns, ColumnsOther, Batch>& other)
     {
         // ToDo: get back to const
         static_assert(batch_value == other.batch_value);
@@ -209,18 +209,18 @@ public:
         return ret;
     }
 
-    // static matrix_classic
-    // get_rand_matrix()
-    // {
-    //     std::srand(std::time({}));    // use current time as seed for random generator
-    //     data_type data_rand;
-    //     for (auto it{data_rand.begin()}; it != data_rand.end(); it++) {
-    //         for (auto it2{(*it).begin()}; it2 != ((*it).end()); it2++) {
-    //             (*it2) = static_cast<Type>(std::rand());
-    //         }
-    //     }
-    //     return matrix_classic{data_rand};
-    // }
+    static matrix
+    get_rand_matrix()
+    {
+        matrix ret{};
+        std::srand(std::time({}));    // use current time as seed for random generator
+        for (std::size_t i = 0; i < Rows; i++) {
+            for (std::size_t j = 0; j < Columns; j++) {
+                ret.get(i, j) = static_cast<Type>(std::rand());
+            }
+        }
+        return ret;
+    }
 
 private:
     data_type         batched_section;

@@ -1,4 +1,5 @@
 #include <xitren/math/matrix.hpp>
+#include <xitren/math/matrix_classic.hpp>
 
 #include <gtest/gtest.h>
 
@@ -47,8 +48,8 @@ TEST(matrix_big_test, matrix_func_add)
 
 TEST(matrix_big_test, matrix_func_mult_part)
 {
-    using loc_type_a = matrix<double, 2, 2>;
-    using loc_type_b = matrix<double, 2, 2>;
+    using loc_type_a = matrix<double, 2, 2, 2>;
+    using loc_type_b = matrix<double, 2, 2, 2>;
 
     loc_type_a mA1{{1, 2, 6, 7}};
     loc_type_b mB1{{10, 20, 40, 50}};
@@ -70,8 +71,8 @@ TEST(matrix_big_test, matrix_func_mult_part)
 
 TEST(matrix_big_test, matrix_func_mult)
 {
-    using loc_type_a = matrix<double, 3, 5>;
-    using loc_type_b = matrix<double, 5, 3>;
+    using loc_type_a = matrix<double, 3, 5, 2>;
+    using loc_type_b = matrix<double, 5, 3, 2>;
     std::array<int, 9> C{{1350, 1500, 1650, 3100, 3500, 3900, 4850, 5500, 6150}};
 
     loc_type_a mA{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}};
@@ -107,4 +108,193 @@ TEST(matrix_big_test, matrix_func2)
     EXPECT_EQ(loc_type::batch_columns, 8);
     EXPECT_EQ(loc_type::rest_rows, 1);
     EXPECT_EQ(loc_type::rest_columns, 1);
+}
+
+constexpr std::size_t times_big   = 100;
+constexpr std::size_t times_small = 10000;
+
+TEST(matrix_test, matrix_hybrid_64x64_mult_time)
+{
+    using loc_type1    = matrix<double, 64, 128, 64>;
+    using loc_type2    = matrix<double, 128, 64, 64>;
+    using loc_type_ret = matrix<double, 64, 64, 64>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type_ret>(mA * mB);
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = std::make_shared<loc_type_ret>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_64x64_mult_time)
+{
+    using loc_type1 = matrix_classic<double, 64, 128>;
+    using loc_type2 = matrix_classic<double, 128, 64>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA * mB;
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = mA * mB;
+    }
+    std::cout << mCptr[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_hybrid_77x77_mult_time)
+{
+    using loc_type1    = matrix<double, 77, 30, 16>;
+    using loc_type2    = matrix<double, 30, 77, 16>;
+    using loc_type_ret = matrix<double, 77, 77, 16>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA * mB;
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = mA * mB;
+    }
+    std::cout << mCptr.get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_77x77_mult_time)
+{
+    using loc_type1 = matrix_classic<double, 77, 30>;
+    using loc_type2 = matrix_classic<double, 30, 77>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA * mB;
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = mA * mB;
+    }
+    std::cout << mCptr[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_hybrid_64x64_mult_unit8_time)
+{
+    using loc_type1    = matrix<std::uint8_t, 64, 128, 64>;
+    using loc_type2    = matrix<std::uint8_t, 128, 64, 64>;
+    using loc_type_ret = matrix<std::uint8_t, 64, 64, 64>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type_ret>(mA * mB);
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = std::make_shared<loc_type_ret>(mA * mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_64x64_mult_unit8_time)
+{
+    using loc_type1 = matrix_classic<std::uint8_t, 64, 128>;
+    using loc_type2 = matrix_classic<std::uint8_t, 128, 64>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA * mB;
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = mA * mB;
+    }
+    std::cout << mCptr[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_hybrid_77x77_mult_unit8_time)
+{
+    using loc_type1    = matrix<std::uint8_t, 77, 30, 16>;
+    using loc_type2    = matrix<std::uint8_t, 30, 77, 16>;
+    using loc_type_ret = matrix<std::uint8_t, 77, 77, 16>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA * mB;
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = mA * mB;
+    }
+    std::cout << mCptr.get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_77x77_mult_unit8_time)
+{
+    using loc_type1 = matrix_classic<std::uint8_t, 77, 30>;
+    using loc_type2 = matrix_classic<std::uint8_t, 30, 77>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA * mB;
+    for (std::size_t i{}; i < times_big; i++) {
+        mCptr = mA * mB;
+    }
+    std::cout << mCptr[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_hybrid_64x128_add_time)
+{
+    using loc_type1    = matrix<double, 64, 128, 64>;
+    using loc_type2    = matrix<double, 64, 128, 64>;
+    using loc_type_ret = matrix<double, 64, 128, 64>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    auto mCptr = std::make_shared<loc_type_ret>(mA + mB);
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = std::make_shared<loc_type_ret>(mA + mB);
+    }
+    std::cout << mCptr->get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_64x128_add_time)
+{
+    using loc_type1 = matrix_classic<double, 64, 128>;
+    using loc_type2 = matrix_classic<double, 64, 128>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA + mB;
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = mA + mB;
+    }
+    std::cout << mCptr[0][0] << std::endl;
+}
+
+TEST(matrix_test, matrix_hybrid_77x77_add_time)
+{
+    using loc_type1    = matrix<double, 77, 77, 16>;
+    using loc_type2    = matrix<double, 77, 77, 16>;
+    using loc_type_ret = matrix<double, 77, 77, 16>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA + mB;
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = mA + mB;
+    }
+    std::cout << mCptr.get(0, 0) << std::endl;
+}
+
+TEST(matrix_test, matrix_naive_77x77_add_time)
+{
+    using loc_type1 = matrix_classic<double, 77, 77>;
+    using loc_type2 = matrix_classic<double, 77, 77>;
+
+    static auto mA = loc_type1::get_rand_matrix();
+    static auto mB = loc_type2::get_rand_matrix();
+
+    static auto mCptr = mA + mB;
+    for (std::size_t i{}; i < times_small; i++) {
+        mCptr = mA + mB;
+    }
+    std::cout << mCptr[0][0] << std::endl;
 }
