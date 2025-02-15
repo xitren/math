@@ -31,22 +31,10 @@ public:
     get(std::size_t row, std::size_t column)
     {
         auto const half_size = Size >> 1;
-        // ToDo: rewrite with branchless
-        // const std::array<quarter_type const*, 4> quart{{&a_, &b_, &c_, &d_}};
-        // auto& sel = branchless_select(row < half_size && column < half_size, a_, c_);
-        if (row < half_size) {
-            if (column < half_size) {
-                return a_.get(row % half_size, column % half_size);
-            } else {
-                return b_.get(row % half_size, column % half_size);
-            }
-        } else {
-            if (column < half_size) {
-                return c_.get(row % half_size, column % half_size);
-            } else {
-                return d_.get(row % half_size, column % half_size);
-            }
-        }
+        auto&      sel1      = branchless_select(column < half_size, a_, b_);
+        auto&      sel2      = branchless_select(column < half_size, c_, d_);
+        auto&      sel_f     = branchless_select(row < half_size, sel1, sel2);
+        return sel_f.get(row % half_size, column % half_size);
     }
 
     matrix_strassen
