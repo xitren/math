@@ -26,7 +26,7 @@ public:
         : a_{get_init(data, 0)}, b_{get_init(data, 1)}, c_{get_init(data, 2)}, d_{get_init(data, 3)}
     {}
 
-    auto&
+    inline auto&
     get(std::size_t row, std::size_t column)
     {
         auto const half_size = Size >> 1;
@@ -36,7 +36,41 @@ public:
         return sel_f.get(row % half_size, column % half_size);
     }
 
-    matrix_strassen
+    inline void
+    mult(matrix_strassen const& other, matrix_strassen& ret)
+    {
+        auto const H1 = (a_ + d_) * (other.a_ + other.d_);
+        auto const H2 = (c_ + d_) * other.a_;
+        auto const H3 = a_ * (other.b_ - other.d_);
+        auto const H4 = d_ * (other.c_ - other.a_);
+        auto const H5 = (a_ + b_) * other.d_;
+        auto const H6 = (c_ - a_) * (other.a_ + other.b_);
+        auto const H7 = (b_ - d_) * (other.c_ + other.d_);
+        ret.a_        = H1 + H4 - H5 + H7;
+        ret.b_        = H3 + H5;
+        ret.c_        = H2 + H4;
+        ret.d_        = H1 + H3 - H2 + H6;
+    }
+
+    inline void
+    add(matrix_strassen const& other, matrix_strassen& ret)
+    {
+        ret.a_ = a_ + other.a_;
+        ret.b_ = b_ + other.b_;
+        ret.c_ = c_ + other.c_;
+        ret.d_ = d_ + other.d_;
+    }
+
+    inline void
+    sub(matrix_strassen const& other, matrix_strassen& ret)
+    {
+        ret.a_ = a_ - other.a_;
+        ret.b_ = b_ - other.b_;
+        ret.c_ = c_ - other.c_;
+        ret.d_ = d_ - other.d_;
+    }
+
+    inline matrix_strassen
     operator*(matrix_strassen const& other) const
     {
         auto const H1 = (a_ + d_) * (other.a_ + other.d_);
@@ -49,13 +83,13 @@ public:
         return matrix_strassen{H1 + H4 - H5 + H7, H3 + H5, H2 + H4, H1 + H3 - H2 + H6};
     }
 
-    matrix_strassen
+    inline matrix_strassen
     operator+(matrix_strassen const& other) const
     {
         return matrix_strassen{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
     }
 
-    matrix_strassen
+    matrix_strassen inline
     operator-(matrix_strassen const& other) const
     {
         return matrix_strassen{a_ + other.a_, b_ + other.b_, c_ + other.c_, d_ + other.d_};
@@ -144,7 +178,46 @@ public:
         }
     }
 
-    matrix_strassen
+    inline void
+    mult(matrix_strassen const& other, matrix_strassen& ret)
+    {
+        Type const& a = data_type::operator[](0);
+        Type const& b = data_type::operator[](1);
+        Type const& c = data_type::operator[](2);
+        Type const& d = data_type::operator[](3);
+        Type const& A = other[0];
+        Type const& C = other[1];
+        Type const& B = other[2];
+        Type const& D = other[3];
+
+        const Type t = a * A;
+        const Type u = (c - a) * (C - D);
+        const Type v = (c + d) * (C - A);
+        const Type w = t + (c + d - a) * (A + D - C);
+
+        ret[0] = t + b * B;
+        ret[1] = w + v + (a + b - c - d) * D;
+        ret[2] = w + u + d * (B + C - A - D);
+        ret[3] = w + u + v;
+    }
+
+    inline void
+    add(matrix_strassen const& other, matrix_strassen& ret)
+    {
+        for (int i{}; i < data_type::size(); i++) {
+            ret[i] = data_type::operator[](i) + other[i];
+        }
+    }
+
+    inline void
+    sub(matrix_strassen const& other, matrix_strassen& ret)
+    {
+        for (int i{}; i < data_type::size(); i++) {
+            ret[i] = data_type::operator[](i) - other[i];
+        }
+    }
+
+    inline matrix_strassen
     operator*(matrix_strassen const& other) const
     {
         Type const& a = data_type::operator[](0);
@@ -165,7 +238,7 @@ public:
             {t + b * B, w + v + (a + b - c - d) * D, w + u + d * (B + C - A - D), w + u + v}}};
     }
 
-    matrix_strassen
+    inline matrix_strassen
     operator+(matrix_strassen const& other) const
     {
         return matrix_strassen{typename matrix_strassen::data_type{
@@ -173,7 +246,7 @@ public:
              data_type::operator[](2) + other[2], data_type::operator[](3) + other[3]}}};
     }
 
-    matrix_strassen
+    inline matrix_strassen
     operator-(matrix_strassen const& other) const
     {
         return matrix_strassen{typename matrix_strassen::data_type{

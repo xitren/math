@@ -9,6 +9,17 @@ FetchContent_MakeAvailable(googletest)
 add_library(GTest::GTest INTERFACE IMPORTED)
 target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
+FetchContent_Declare(
+    Eigen3
+    DOWNLOAD_EXTRACT_TIMESTAMP ON
+    URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+)
+set(EIGEN_BUILD_PKGCONFIG OFF)
+set(EIGEN_LEAVE_TEST_IN_ALL_TARGET OFF)
+set(EIGEN_BUILD_DOC OFF)
+set(BUILD_TESTING OFF)
+FetchContent_MakeAvailable(Eigen3)
+
 include(GoogleTest)
 
 file(GLOB TESTS *.cpp)
@@ -22,6 +33,6 @@ foreach (file ${TESTS})
         target_compile_options(${tgt} PRIVATE -Wall -Wextra -Wpedantic -Wc++20-compat -Wno-format-security
                 -Woverloaded-virtual -Wsuggest-override)
     endif ()
-    target_link_libraries(${tgt} PRIVATE ${LIBRARY_NAME} GTest::gtest GTest::GTest -pthread)
+    target_link_libraries(${tgt} PRIVATE ${LIBRARY_NAME} GTest::gtest GTest::GTest Eigen3::Eigen -pthread)
     gtest_discover_tests(${tgt} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach ()
