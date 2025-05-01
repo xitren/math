@@ -1,4 +1,10 @@
-#include <xitren/math/fir.hpp>
+#include <xitren/math/fir/filter.hpp>
+#include <xitren/math/fir/lowpass.hpp>
+#include <xitren/math/fir/highpass.hpp>
+#include <xitren/math/fir/bandpass.hpp>
+#include <xitren/math/fir/bandstop.hpp>
+#include <xitren/math/fir/moving_average.hpp>
+
 
 #include <gtest/gtest.h>
 
@@ -28,7 +34,7 @@ arrays_match(const std::array<double, Size>& expected, const std::array<double, 
 TEST(fir_test, moving_average)
 {
     double            test;
-    moving_average<5> averager;
+    fir::moving_average<double, 5> averager;
     averager.value(5.);
     averager.value(5.);
     averager.value(5.);
@@ -68,7 +74,7 @@ TEST(fir_test, lowpass)
                                -0.03065774782638312,
                                -0.03474130477547084,
                                -0.03027306914562628};
-    lowpass<20, 20, 250>   filter;
+    fir::lowpass<double, 20, 20, 250>   filter;
     EXPECT_TRUE(arrays_match(arr, filter.table()));
 }
 
@@ -95,7 +101,7 @@ TEST(fir_test, highpass)
                                0.03065774782638312,
                                0.03474130477547084,
                                0.03027306914562628};
-    highpass<20, 20, 250>  filter;
+    fir::highpass<double, 20, 20, 250>  filter;
     EXPECT_TRUE(arrays_match(arr, filter.table()));
 }
 
@@ -122,7 +128,7 @@ TEST(fir_test, bandstop)
                                -0.06974171569878782,
                                -0.04776104749397292,
                                -0.011563283469853507};
-    bandstop<20, 20, 40, 250> filter;
+    fir::bandstop<double, 20, 20, 40, 250> filter;
     EXPECT_TRUE(arrays_match(arr, filter.table()));
 }
 
@@ -135,13 +141,13 @@ TEST(fir_test, bandpass)
                                0.00962873510906545,  -0.09259565567449464,  -0.1333193446743846,
                                -0.09796570964279813, -0.019842542831567514, 0.047867970834589026,
                                0.06974171569878782,  0.04776104749397292,   0.011563283469853507};
-    bandpass<20, 20, 40, 250> filter;
+    fir::bandpass<double, 20, 20, 40, 250> filter;
     EXPECT_TRUE(arrays_match(arr, filter.table()));
 }
 
 TEST(fir_test, custom_filter)
 {
-    filter<5> filter{std::array<double, 5>{0.195761478272605788, 0.202111172410324363,
+    fir::filter<double, 5> filter{std::array<double, 5>{0.195761478272605788, 0.202111172410324363,
                                            0.204254698634139670, 0.202111172410324363,
                                            0.195761478272605788}};    // https://fiiir.com/
     filter.value(5.);
@@ -166,7 +172,7 @@ TEST(fir_test, custom_filter)
 
 TEST(fir_test, custom_mid_size_filter)
 {
-    filter<91> filter{
+    fir::filter<double, 91> filter{
         std::array<double, 91>{-0.001502116839846245, -0.001081186705517384, -0.000634392034347178,
                                -0.000162630857175135, 0.000333089700366734,  0.000851656286610844,
                                0.001391852666090162,  0.001952363523561613,  0.002531778715981624,
