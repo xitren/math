@@ -66,7 +66,7 @@ public:
     {
         filter ret(*this);
         for (std::size_t i{}; i < Order; ++i) {
-            ret.table_[i] = this->table_[i] * other.table_[i];
+            ret.table_[i] = this->table_[i] + other.table_[i];
         }
         return ret;
     }
@@ -76,7 +76,7 @@ public:
     {
         filter ret(*this);
         for (std::size_t i{}; i < Order; ++i) {
-            ret.table_[i] = this->table_[i] * other.table_[i];
+            ret.table_[i] = this->table_[i] - other.table_[i];
         }
         return ret;
     }
