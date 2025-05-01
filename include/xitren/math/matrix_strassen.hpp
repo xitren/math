@@ -235,23 +235,28 @@ public:
         const Type w = t + (c + d - a) * (A + D - C);
 
         return matrix_strassen{typename matrix_strassen::data_type{
-            {t + b * B, w + v + (a + b - c - d) * D, w + u + d * (B + C - A - D), w + u + v}}};
+            {static_cast<Type>(t + b * B), static_cast<Type>(w + v + (a + b - c - d) * D),
+             static_cast<Type>(w + u + d * (B + C - A - D)), static_cast<Type>(w + u + v)}}};
     }
 
-    inline matrix_strassen
+    inline constexpr matrix_strassen
     operator+(matrix_strassen const& other) const
     {
-        return matrix_strassen{typename matrix_strassen::data_type{
-            {data_type::operator[](0) + other[0], data_type::operator[](1) + other[1],
-             data_type::operator[](2) + other[2], data_type::operator[](3) + other[3]}}};
+        return matrix_strassen{
+            typename matrix_strassen::data_type{{static_cast<Type>(data_type::operator[](0) + other[0]),
+                                                 static_cast<Type>(data_type::operator[](1) + other[1]),
+                                                 static_cast<Type>(data_type::operator[](2) + other[2]),
+                                                 static_cast<Type>(data_type::operator[](3) + other[3])}}};
     }
 
-    inline matrix_strassen
+    inline constexpr matrix_strassen
     operator-(matrix_strassen const& other) const
     {
-        return matrix_strassen{typename matrix_strassen::data_type{
-            {data_type::operator[](0) - other[0], data_type::operator[](1) - other[1],
-             data_type::operator[](2) - other[2], data_type::operator[](3) - other[3]}}};
+        return matrix_strassen{
+            typename matrix_strassen::data_type{{static_cast<Type>(data_type::operator[](0) - other[0]),
+                                                 static_cast<Type>(data_type::operator[](1) - other[1]),
+                                                 static_cast<Type>(data_type::operator[](2) - other[2]),
+                                                 static_cast<Type>(data_type::operator[](3) - other[3])}}};
     }
 
     static matrix_strassen

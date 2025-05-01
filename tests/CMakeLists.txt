@@ -13,6 +13,8 @@ FetchContent_Declare(
     Eigen3
     DOWNLOAD_EXTRACT_TIMESTAMP ON
     URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+    GIT_SHALLOW TRUE
+    SOURCE_SUBDIR cmake
 )
 set(EIGEN_BUILD_PKGCONFIG OFF)
 set(EIGEN_LEAVE_TEST_IN_ALL_TARGET OFF)
@@ -20,6 +22,10 @@ set(EIGEN_BUILD_DOC OFF)
 set(EIGEN_BUILD_TESTING OFF)
 set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(Eigen3)
+if(NOT TARGET Eigen3::Eigen)
+    add_library(Eigen3::Eigen INTERFACE IMPORTED)
+    set_target_properties(Eigen3::Eigen PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${eigen3_SOURCE_DIR})
+endif()
 
 include(GoogleTest)
 
